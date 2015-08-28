@@ -18,19 +18,28 @@
 
 package com.redhat.et.cachecoach;
 
-sealed case class SourceLine(file: String, line: Int) {}
+sealed case class StackTraceEntry(method: String, file: String, line: Int) {}
 
+sealed case class StorageLevel(useDisk: Boolean, useMemory: Boolean, useExternalBlockStore: Boolean, deserialized: Boolean, replication: Int) {}
+
+sealed case class RDDInfo(id: Int, name: String, scope: String, parents: List[Int], externalBlockStoreSize: Int, storageLevel: StorageLevel, diskSize: Long, memorySize: Long, numberOfPartitions: Long, numberOfCachedPartitions: Long) {}
+
+sealed case class StageInfo(stageAttemptID: Int, submissionTime: Long, numberOfTasks: Int, parentIDs: List[Int], stageID: Int, rddInfo: List[RDDInfo], stageName: String, completionTime: Long, details: List[StackTraceEntry],
+accumulables: List[Any]) {}
+
+/** An entry in a Spark event log */
 abstract class SparkEvent {}
-case class SparkListenerLogStart(event: String, sparkVersion: String) extends SparkEvent {}
-case class SparkListenerStageCompleted(stageInfo: String, event: String) extends SparkEvent {}
-case class SparkListenerEnvironmentUpdate(jvmInformation: String, classpathEntries: String, sparkProperties: String, event: String, systemProperties: String) extends SparkEvent {}
-case class SparkListenerExecutorAdded(timestamp: String, executorInfo: String, event: String, executorID: String) extends SparkEvent {}
-case class SparkListenerJobStart(submissionTime: String, stageIDs: String, properties: String, jobID: String, stageInfos: String, event: String) extends SparkEvent {}
-case class SparkListenerStageSubmitted(stageInfo: String, event: String, properties: String) extends SparkEvent {}
-case class SparkListenerTaskStart(stageAttemptID: String, taskInfo: String, event: String, stageID: String) extends SparkEvent {}
-case class SparkListenerTaskEnd(stageAttemptID: String, taskInfo: String, taskType: String, stageID: String, taskEndReason: String, taskMetrics: String, event: String) extends SparkEvent {}
-case class SparkListenerBlockManagerAdded(timestamp: String, blockManagerID: String, event: String, maximumMemory: String) extends SparkEvent {}
-case class SparkListenerApplicationEnd(timestamp: String, event: String) extends SparkEvent {}
-case class SparkListenerJobEnd(jobID: String, jobResult: String, event: String, completionTime: String) extends SparkEvent {}
-case class SparkListenerApplicationStart(timestamp: String, appID: String, event: String, appName: String, user: String) extends SparkEvent {}
-case class SparkListenerUnpersistRDD(rddID: String, event: String) extends SparkEvent {}
+
+sealed case class SparkListenerLogStart(sparkVersion: String) extends SparkEvent {}
+sealed case class SparkListenerStageCompleted(stageInfo: String) extends SparkEvent {}
+sealed case class SparkListenerEnvironmentUpdate(jvmInformation: String, classpathEntries: String, sparkProperties: String, systemProperties: String) extends SparkEvent {}
+sealed case class SparkListenerExecutorAdded(timestamp: Long, executorInfo: String, executorID: String) extends SparkEvent {}
+sealed case class SparkListenerJobStart(submissionTime: Long, stageIDs: String, properties: String, jobID: String, stageInfos: String) extends SparkEvent {}
+sealed case class SparkListenerStageSubmitted(stageInfo: String, properties: String) extends SparkEvent {}
+sealed case class SparkListenerTaskStart(stageAttemptID: String, taskInfo: String, stageID: String) extends SparkEvent {}
+sealed case class SparkListenerTaskEnd(stageAttemptID: String, taskInfo: String, taskType: String, stageID: String, taskEndReason: String, taskMetrics: String) extends SparkEvent {}
+sealed case class SparkListenerBlockManagerAdded(timestamp: Long, blockManagerID: String, maximumMemory: String) extends SparkEvent {}
+sealed case class SparkListenerApplicationEnd(timestamp: Long) extends SparkEvent {}
+sealed case class SparkListenerJobEnd(jobID: String, jobResult: String, completionTime: Long) extends SparkEvent {}
+sealed case class SparkListenerApplicationStart(timestamp: Long, appID: String, appName: String, user: String) extends SparkEvent {}
+sealed case class SparkListenerUnpersistRDD(rddID: String) extends SparkEvent {}
